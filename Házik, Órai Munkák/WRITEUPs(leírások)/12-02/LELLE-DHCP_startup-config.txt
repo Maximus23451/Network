@@ -1,0 +1,132 @@
+!
+version 15.1
+no service timestamps log datetime msec
+no service timestamps debug datetime msec
+no service password-encryption
+!
+hostname LELLE-DHCP-R1
+!
+!
+!
+enable secret 5 $1$mERr$avqqjGKoBU1dksnO9zryh1
+!
+!
+!
+ip dhcp pool LELLE
+ network 100.0.2.0 255.255.255.0
+ default-router 100.0.2.254
+ dns-server 1.1.1.1
+ip dhcp pool BOGLAR-USER
+ network 100.0.0.0 255.255.254.0
+ default-router 100.0.1.254
+ dns-server 1.1.1.1
+ip dhcp pool BOGLAR-ADMIN
+ network 100.0.3.0 255.255.255.248
+ default-router 100.0.3.6
+ dns-server 1.1.1.1
+!
+!
+!
+no ip cef
+no ipv6 cef
+!
+!
+!
+username Admin password 0 Password123
+!
+!
+license udi pid CISCO2911/K9 sn FTX15241FF8-
+!
+!
+!
+!
+!
+!
+!
+!
+!
+ip domain-name BALATON.HU
+!
+!
+spanning-tree mode pvst
+!
+!
+!
+!
+!
+!
+interface GigabitEthernet0/0
+ description >>> LELLE-LAN >>>
+ ip address 100.0.2.254 255.255.255.0
+ duplex auto
+ speed auto
+!
+interface GigabitEthernet0/1
+ no ip address
+ duplex auto
+ speed auto
+ shutdown
+!
+interface GigabitEthernet0/2
+ no ip address
+ duplex auto
+ speed auto
+ shutdown
+!
+interface Serial0/0/0
+ description >>>> TO BOGLAR R1 >>>>
+ ip address 192.168.0.1 255.255.255.252
+ clock rate 64000
+!
+interface Serial0/0/1
+ no ip address
+ clock rate 2000000
+ shutdown
+!
+interface Vlan1
+ no ip address
+ shutdown
+!
+router ospf 99
+ router-id 1.1.1.1
+ log-adjacency-changes
+ passive-interface default
+ no passive-interface Serial0/0/0
+ network 192.168.0.0 0.0.0.3 area 0
+ network 100.0.2.0 0.0.0.255 area 0
+!
+ip classless
+!
+ip flow-export version 9
+!
+!
+ip access-list extended USR-BLK
+ permit tcp 100.0.3.0 0.0.0.7 any eq 22
+ deny tcp any any eq 22
+ permit ip any any
+ remark PERMITING ONLY ADMIN NETWORK, EVERY OTHER SSH TRY WILL BE BLOOCKED
+!
+banner motd +MADE BY KZoli 13C!!!!!! masolati veszely, driveba szerepel ez a file. #############+
+!
+!
+!
+!
+line con 0
+!
+line aux 0
+!
+line vty 0 4
+ access-class USR-BLK in
+ password Password123
+ login local
+ transport input ssh
+line vty 5 15
+ access-class USR-BLK in
+ password Password123
+ login local
+ transport input ssh
+!
+!
+!
+end
+
